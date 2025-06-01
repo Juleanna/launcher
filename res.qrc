@@ -1,0 +1,22 @@
+<RCC>
+  <qresource prefix="/">
+    <file>images/background.jpg</file>
+    <file>images/background.png</file>
+    <file>images/baner.png</file>
+    <file>images/close.png</file>
+    <file>images/discord.png</file>
+    <file>images/discord_hover.png</file>
+    <file>images/facebook.png</file>
+    <file>images/facebook_hover.png</file>
+    <file>images/globe.png</file>
+    <file>images/globe_hover.png</file>
+    <file>images/instagram.png</file>
+    <file>images/instagram_hover.png</file>
+    <file>images/logo.png</file>
+    <file>images/minimize-sign.png</file>
+    <file>images/telegram.png</file>
+    <file>images/telegram_hover.png</file>
+    <file>images/vk.png</file>
+    <file>images/vk_hover.png</file>
+  </qresource>
+</RCC>
