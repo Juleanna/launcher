@@ -1,2 +1,2 @@
-python F:\soft\launcher\Launcher.py
+python Launcher.py
 pause

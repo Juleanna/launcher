@@ -1,2 +1,2 @@
-python F:\soft\launcher\Update.py
+python Update.py
 pause
