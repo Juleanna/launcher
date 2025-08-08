@@ -24,7 +24,6 @@ try:
     from crypto_utils import CryptoManager, verify_update_integrity
     CRYPTO_AVAILABLE = True
 except ImportError:
-    logger.warning("Криптографические модули недоступны. Цифровые подписи отключены.")
     CRYPTO_AVAILABLE = False
     CryptoManager = None
     verify_update_integrity = None
@@ -33,7 +32,6 @@ try:
     from download_manager import DownloadManager, ResumableDownload
     RESUMABLE_DOWNLOADS = True
 except ImportError:
-    logger.warning("Менеджер загрузок недоступен. Пауза/возобновление отключено.")
     RESUMABLE_DOWNLOADS = False
     DownloadManager = None
     ResumableDownload = None
@@ -42,7 +40,6 @@ try:
     from backup_manager import BackupManager, RollbackManager
     BACKUP_AVAILABLE = True
 except ImportError:
-    logger.warning("Менеджер резервных копий недоступен. Откат обновлений отключен.")
     BACKUP_AVAILABLE = False
     BackupManager = None
     RollbackManager = None
@@ -51,20 +48,19 @@ try:
     from delta_updates import DeltaApplier, is_delta_update_beneficial
     DELTA_UPDATES_AVAILABLE = True
 except ImportError:
-    logger.warning("Модуль delta-обновлений недоступен. Используется полное обновление.")
     DELTA_UPDATES_AVAILABLE = False
     DeltaApplier = None
     is_delta_update_beneficial = None
 
 try:
-    from ui_enhancements import (StatisticsManager, EnhancedProgressWidget, 
-                                StatisticsWidget, EnhancedInfoWidget)
+    from ui_enhancements import (StatisticsManager, EnhancedProgressBar, 
+                                StatisticsWidget, TabbedInfoWidget)
     UI_ENHANCEMENTS_AVAILABLE = True
+    EnhancedInfoWidget = TabbedInfoWidget  # Псевдоним для совместимости
 except ImportError:
-    logger.warning("Улучшения UI недоступны. Используется обычный интерфейс.")
     UI_ENHANCEMENTS_AVAILABLE = False
     StatisticsManager = None
-    EnhancedProgressWidget = None
+    EnhancedProgressBar = None
     StatisticsWidget = None
     EnhancedInfoWidget = None
 
@@ -72,7 +68,6 @@ try:
     from cache_manager import get_cache_manager, get_metadata_cache
     CACHE_AVAILABLE = True
 except ImportError:
-    logger.warning("Кэширование недоступно.")
     CACHE_AVAILABLE = False
     get_cache_manager = None
     get_metadata_cache = None
@@ -94,6 +89,20 @@ except ImportError:
     )
     logger = logging.getLogger(__name__)
     launcher_logger = None
+
+# Логирование недоступных модулей после инициализации logger
+if not CRYPTO_AVAILABLE:
+    logger.warning("Криптографические модули недоступны. Цифровые подписи отключены.")
+if not RESUMABLE_DOWNLOADS:
+    logger.warning("Менеджер загрузок недоступен. Пауза/возобновление отключено.")
+if not BACKUP_AVAILABLE:
+    logger.warning("Менеджер резервных копий недоступен. Откат обновлений отключен.")
+if not DELTA_UPDATES_AVAILABLE:
+    logger.warning("Модуль delta-обновлений недоступен. Используется полное обновление.")
+if not UI_ENHANCEMENTS_AVAILABLE:
+    logger.warning("Улучшения UI недоступны. Используется обычный интерфейс.")
+if not CACHE_AVAILABLE:
+    logger.warning("Кэширование недоступно.")
 
 # Константы безопасности
 # Константы безопасности
@@ -287,7 +296,8 @@ class UpdateThread(QThread):
                 # Проверка целостности обновления лаунчера
                 if CRYPTO_AVAILABLE:
                     try:
-                        if verify_update_integrity(launcher_update_filename):
+                        public_key_url = self.config.get('Update', 'public_key_url', fallback=None)
+                        if verify_update_integrity(launcher_update_filename, public_key_url=public_key_url):
                             logger.info("Целостность обновления лаунчера подтверждена")
                         else:
                             logger.warning("Не удалось проверить подпись обновления лаунчера")
@@ -673,7 +683,8 @@ class UpdateThread(QThread):
                                         except Exception as cache_error:
                                             logger.warning(f"Ошибка сохранения манифеста в кэш: {cache_error}")
                                 
-                                if verify_update_integrity(zip_filename, manifest_path):
+                                public_key_url = self.config.get('Update', 'public_key_url', fallback=None)
+                                if verify_update_integrity(zip_filename, manifest_path, public_key_url):
                                     logger.info(f"Целостность архива подтверждена: {zip_filename}")
                                 else:
                                     logger.error(f"Нарушена целостность архива: {zip_filename}")
@@ -760,7 +771,17 @@ class UpdateThread(QThread):
                     self.update_finished.emit(True, "У вас уже установлена последняя версия.")
                     
             except Exception as e:
-                logger.error(f"Ошибка обновления: {e}")
+                if "refused" in str(e).lower() or "connection" in str(e).lower():
+                    logger.warning(f"Сервер обновлений недоступен: {e}")
+                    # Проверяем, указан ли localhost в конфигурации
+                    update_url = self.config.get('Update', 'update_url')
+                    if "127.0.0.1" in update_url or "localhost" in update_url.lower():
+                        self.update_finished.emit(True, "Запуск в оффлайн режиме - локальный сервер недоступен. Игра готова к запуску.")
+                    else:
+                        self.update_finished.emit(False, "Сервер обновлений недоступен. Проверьте подключение к интернету.")
+                    return
+                else:
+                    logger.error(f"Ошибка обновления: {e}")
                 
                 # Предлагаем откат при ошибке
                 if self.rollback_manager and BACKUP_AVAILABLE:
@@ -770,11 +791,11 @@ class UpdateThread(QThread):
                         
                         # Ищем последнюю резервную копию
                         if backups:
-                            latest_backup = max(backups, key=lambda x: x.created_at)
-                            logger.info(f"Попытка автоматического отката к версии {latest_backup.version}")
+                            latest_backup = max(backups, key=lambda x: x['created_at'])
+                            logger.info(f"Попытка автоматического отката к версии {latest_backup['version']}")
                             
-                            if self.rollback_manager.perform_rollback(latest_backup.version):
-                                self.update_finished.emit(False, f"Ошибка обновления. Выполнен автоматический откат к версии {latest_backup.version}")
+                            if self.rollback_manager.perform_rollback(latest_backup['version']):
+                                self.update_finished.emit(False, f"Ошибка обновления. Выполнен автоматический откат к версии {latest_backup['version']}")
                             else:
                                 self.update_finished.emit(False, f"Ошибка обновления: {e}. Откат не удался.")
                         else:
@@ -817,7 +838,17 @@ class UpdateThread(QThread):
 
                     return False, current_version
             except Exception as e:
-                print(f"Error checking for launcher update: {e}")
+                if "refused" in str(e).lower() or "connection" in str(e).lower():
+                    logger.warning(f"Сервер обновлений недоступен: {e}")
+                    update_url = self.config.get('Update', 'update_url')
+                    if "127.0.0.1" in update_url or "localhost" in update_url.lower():
+                        logger.info("Работа в оффлайн режиме - локальный сервер недоступен")
+                        print("Работа в оффлайн режиме - локальный сервер недоступен.")
+                    else:
+                        print("Сервер обновлений недоступен. Лаунчер будет работать в автономном режиме.")
+                else:
+                    logger.error(f"Ошибка проверки обновлений лаунчера: {e}")
+                    print(f"Error checking for launcher update: {e}")
                 return False, str(e)
 
 
@@ -826,8 +857,21 @@ class UpdateThread(QThread):
         try:
             logger.info("Запуск процесса обновления")
             
+            # Проверка на запрос прерывания
+            if self.isInterruptionRequested():
+                logger.info("Обновление прервано пользователем")
+                self.update_finished.emit(False, "Обновление отменено")
+                return
+            
             # Проверяем обновления лаунчера
             needs_update, latest_version = asyncio.run(self.check_for_launcher_update())
+            
+            # Проверка на запрос прерывания
+            if self.isInterruptionRequested():
+                logger.info("Обновление прервано пользователем")
+                self.update_finished.emit(False, "Обновление отменено")
+                return
+            
             if needs_update:
                 logger.info(f"Обновляем лаунчер до версии {latest_version}")
                 asyncio.run(self.update_launcher())
@@ -919,12 +963,29 @@ class UpdateThread(QThread):
     def stop_safely(self):
         """Безопасная остановка потока"""
         logger.info("Получен запрос на остановку обновления")
+        
+        # Если поток уже не запущен, ничего не делаем
+        if not self.isRunning():
+            logger.debug("Поток обновления уже остановлен")
+            return
+        
         # Отменяем текущую загрузку
         self.cancel_download()
+        
+        # Запрашиваем прерывание
         self.requestInterruption()
-        if not self.wait(5000):  # Ждем 5 секунд
-            logger.warning("Принудительное завершение потока обновления")
+        
+        # Ждем завершения потока
+        if not self.wait(3000):  # Ждем 3 секунды
+            logger.info("Поток обновления не завершился самостоятельно, выполняем принудительное завершение")
             self.terminate()
+            # Ждем завершения после terminate
+            if not self.wait(2000):  # Ждем еще 2 секунды
+                logger.warning("Поток обновления не отвечает - возможно зависание")
+            else:
+                logger.info("Поток обновления успешно завершен")
+        else:
+            logger.info("Поток обновления завершен корректно")
 
 class LauncherWindow(QMainWindow):
     def __init__(self):
@@ -1039,6 +1100,19 @@ class LauncherWindow(QMainWindow):
         else:
             self.rollback_button = None
         
+        # Кнопка UI редактора (если доступна)
+        try:
+            self.ui_editor_button = self.findChild(QPushButton, 'ui_editor_button')
+            if self.ui_editor_button:
+                self.ui_editor_button.clicked.connect(self.open_ui_editor)
+                self.ui_editor_button.setText("Редактор UI")
+                self.ui_editor_button.setStyleSheet(f"background-color: #4CAF50; color: #ffffff;")
+            else:
+                logger.info("Кнопка UI редактора не найдена в UI")
+        except Exception as e:
+            logger.warning(f"Ошибка инициализации кнопки UI редактора: {e}")
+            self.ui_editor_button = None
+        
         # Инициализация статистики и улучшенного UI
         if UI_ENHANCEMENTS_AVAILABLE:
             try:
@@ -1059,7 +1133,7 @@ class LauncherWindow(QMainWindow):
                 # Пытаемся заменить обычные прогресс-бары на улучшенные
                 progress_container = self.findChild(QWidget, 'progress_container')
                 if progress_container:
-                    self.enhanced_progress = EnhancedProgressWidget()
+                    self.enhanced_progress = EnhancedProgressBar()
                     progress_layout = QVBoxLayout(progress_container) if not progress_container.layout() else progress_container.layout()
                     progress_layout.addWidget(self.enhanced_progress)
                     logger.info("Улучшенный виджет прогресса добавлен")
@@ -1138,6 +1212,9 @@ class LauncherWindow(QMainWindow):
             self.buttons.append(btn)
 
         self.show_next_image()
+
+        # Применяем пользовательскую конфигурацию UI если она есть
+        self.apply_ui_config()
 
         self.update_launcher_on_startup()
 
@@ -1249,14 +1326,14 @@ class LauncherWindow(QMainWindow):
                 return
             
             # Сортируем по дате создания (новые сверху)
-            backups.sort(key=lambda x: x.created_at, reverse=True)
+            backups.sort(key=lambda x: x['created_at'], reverse=True)
             
             # Создаем список для выбора
             items = []
             for backup in backups:
                 from datetime import datetime
-                created_date = datetime.fromisoformat(backup.created_at).strftime("%Y-%m-%d %H:%M")
-                item_text = f"Версия {backup.version} - {created_date} ({backup.files_count} файлов)"
+                created_date = datetime.fromisoformat(backup['created_at']).strftime("%Y-%m-%d %H:%M")
+                item_text = f"Версия {backup['version']} - {created_date} ({backup['files_count']} файлов)"
                 items.append(item_text)
             
             # Показываем диалог выбора
@@ -1278,14 +1355,14 @@ class LauncherWindow(QMainWindow):
                 reply = QMessageBox.question(
                     self,
                     "Подтверждение отката",
-                    f"Вы уверены, что хотите откатиться к версии {selected_backup.version}?\n\n"
+                    f"Вы уверены, что хотите откатиться к версии {selected_backup['version']}?\n\n"
                     f"Это заменит текущие файлы игры!",
                     QMessageBox.Yes | QMessageBox.No,
                     QMessageBox.No
                 )
                 
                 if reply == QMessageBox.Yes:
-                    self.perform_rollback(selected_backup.version)
+                    self.perform_rollback(selected_backup['version'])
                     
         except Exception as e:
             logger.error(f"Ошибка отображения диалога отката: {e}")
@@ -1554,6 +1631,167 @@ class LauncherWindow(QMainWindow):
         print(f"Latest launcher version: {latest_launcher_version}")
 
         return latest_launcher_version != current_launcher_version
+    
+    def open_ui_editor(self):
+        """Открытие UI редактора"""
+        try:
+            from ui_editor import UIEditor
+            
+            # Проверяем, не открыт ли уже редактор
+            if hasattr(self, 'ui_editor') and self.ui_editor and not self.ui_editor.isHidden():
+                self.ui_editor.raise_()
+                self.ui_editor.activateWindow()
+                return
+            
+            # Создаем новый экземпляр редактора
+            self.ui_editor = UIEditor(self)
+            self.ui_editor.setWindowTitle("UI редактор лаунчера")
+            
+            # Загружаем существующую конфигурацию UI если она есть
+            ui_config_file = "launcher_ui_config.ui.json"
+            if os.path.exists(ui_config_file):
+                try:
+                    import json
+                    with open(ui_config_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    if 'widgets' in data:
+                        self.ui_editor.canvas.load_widgets_data(data['widgets'])
+                        logger.info(f"Загружена конфигурация UI из {ui_config_file}")
+                
+                except Exception as e:
+                    logger.error(f"Ошибка загрузки конфигурации UI: {e}")
+                    QMessageBox.warning(
+                        self, 
+                        "Предупреждение", 
+                        f"Не удалось загрузить конфигурацию UI: {e}"
+                    )
+            
+            # Устанавливаем файл по умолчанию для сохранения
+            self.ui_editor.current_file = ui_config_file
+            self.ui_editor.set_modified(False)
+            
+            # Показываем редактор
+            self.ui_editor.show()
+            logger.info("UI редактор открыт")
+            
+        except ImportError as e:
+            logger.error(f"UI редактор недоступен: {e}")
+            QMessageBox.critical(
+                self, 
+                "Ошибка", 
+                "UI редактор недоступен. Убедитесь, что файл ui_editor.py находится в папке лаунчера."
+            )
+        except Exception as e:
+            logger.error(f"Ошибка открытия UI редактора: {e}")
+            QMessageBox.critical(
+                self, 
+                "Ошибка", 
+                f"Ошибка открытия UI редактора: {e}"
+            )
+    
+    def apply_ui_config(self, config_file: str = "launcher_ui_config.ui.json"):
+        """Применение конфигурации UI к лаунчеру"""
+        try:
+            if not os.path.exists(config_file):
+                logger.info(f"Файл конфигурации UI {config_file} не найден")
+                return False
+            
+            import json
+            with open(config_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            widgets_data = data.get('widgets', [])
+            
+            # Применяем настройки к существующим виджетам
+            for widget_data in widgets_data:
+                widget_type = widget_data['type']
+                props = widget_data['properties']
+                
+                # Ищем соответствующий виджет в лаунчере
+                target_widget = None
+                
+                if widget_type == 'button':
+                    # Ищем кнопки по тексту
+                    text = props.get('text', '')
+                    if 'играть' in text.lower() or 'play' in text.lower():
+                        target_widget = self.update_button
+                    elif 'пауза' in text.lower() or 'pause' in text.lower():
+                        target_widget = getattr(self, 'pause_button', None)
+                    elif 'откат' in text.lower() or 'rollback' in text.lower():
+                        target_widget = getattr(self, 'rollback_button', None)
+                
+                elif widget_type == 'label':
+                    text = props.get('text', '')
+                    if 'version' in text.lower():
+                        target_widget = self.Version
+                    elif any(word in text.lower() for word in ['сервер', 'server', 'название']):
+                        target_widget = self.Name_server
+                
+                if target_widget:
+                    self.apply_widget_properties(target_widget, props)
+            
+            logger.info(f"Конфигурация UI применена из {config_file}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Ошибка применения конфигурации UI: {e}")
+            return False
+    
+    def apply_widget_properties(self, widget, properties: dict):
+        """Применение свойств к виджету"""
+        try:
+            # Позиция и размер
+            if all(key in properties for key in ['x', 'y', 'width', 'height']):
+                widget.setGeometry(
+                    properties['x'],
+                    properties['y'],
+                    properties['width'],
+                    properties['height']
+                )
+            
+            # Текст
+            if hasattr(widget, 'setText') and 'text' in properties:
+                widget.setText(properties['text'])
+            
+            # Шрифт
+            if properties.get('font_family') or properties.get('font_size'):
+                from PyQt5.QtGui import QFont
+                font = QFont(
+                    properties.get('font_family', 'Arial'),
+                    properties.get('font_size', 12)
+                )
+                widget.setFont(font)
+            
+            # Стили
+            style_parts = []
+            
+            if properties.get('background_color'):
+                style_parts.append(f"background-color: {properties['background_color']}")
+            
+            if properties.get('text_color'):
+                style_parts.append(f"color: {properties['text_color']}")
+            
+            if properties.get('border_width') and properties.get('border_color'):
+                border_style = f"{properties['border_width']}px solid {properties['border_color']}"
+                style_parts.append(f"border: {border_style}")
+            
+            if properties.get('border_radius'):
+                style_parts.append(f"border-radius: {properties['border_radius']}px")
+            
+            if style_parts:
+                widget.setStyleSheet("; ".join(style_parts))
+            
+            # Видимость
+            if 'visible' in properties:
+                widget.setVisible(properties['visible'])
+            
+            # Прозрачность
+            if 'opacity' in properties:
+                widget.setWindowOpacity(properties['opacity'])
+            
+        except Exception as e:
+            logger.error(f"Ошибка применения свойств к виджету: {e}")
 
 
 if __name__ == '__main__':

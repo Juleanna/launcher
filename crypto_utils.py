@@ -21,11 +21,14 @@ logger = logging.getLogger(__name__)
 class CryptoManager:
     """Менеджер криптографических операций"""
     
-    def __init__(self, keys_dir="crypto_keys"):
+    def __init__(self, keys_dir="crypto_keys", public_key_url=None):
         self.keys_dir = Path(keys_dir)
         self.keys_dir.mkdir(exist_ok=True)
         self.private_key_path = self.keys_dir / "private_key.pem"
         self.public_key_path = self.keys_dir / "public_key.pem"
+        self.cached_public_key_path = self.keys_dir / "cached_public_key.pem"
+        self.public_key_url = public_key_url
+        self._cached_public_key = None
         
     def generate_keys(self):
         """Генерация RSA ключей для подписи"""
@@ -82,17 +85,81 @@ class CryptoManager:
             logger.error(f"Ошибка загрузки приватного ключа: {e}")
             return None
     
-    def load_public_key(self):
-        """Загрузка публичного ключа"""
+    def download_public_key(self):
+        """Загрузка публичного ключа с сервера"""
+        if not self.public_key_url:
+            logger.warning("URL для загрузки публичного ключа не указан")
+            return None
+            
         try:
-            if not self.public_key_path.exists():
-                logger.error("Публичный ключ не найден")
-                return None
+            logger.info(f"Загрузка публичного ключа с {self.public_key_url}")
             
-            with open(self.public_key_path, 'rb') as f:
-                public_key = load_pem_public_key(f.read())
+            # Создаем SSL контекст для безопасного соединения
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = True
+            ssl_context.verify_mode = ssl.CERT_REQUIRED
             
+            response = requests.get(
+                self.public_key_url, 
+                timeout=30,
+                verify=True,  # Проверяем SSL сертификат
+                headers={'User-Agent': 'GameLauncher/1.0'}
+            )
+            response.raise_for_status()
+            
+            # Проверяем, что получили PEM ключ
+            key_data = response.text
+            if not key_data.startswith('-----BEGIN PUBLIC KEY-----'):
+                raise ValueError("Неверный формат публичного ключа")
+            
+            # Проверяем валидность ключа
+            public_key = load_pem_public_key(key_data.encode('utf-8'))
+            
+            # Сохраняем в кеш
+            with open(self.cached_public_key_path, 'w', encoding='utf-8') as f:
+                f.write(key_data)
+            
+            logger.info("Публичный ключ успешно загружен и сохранен")
             return public_key
+            
+        except requests.RequestException as e:
+            logger.error(f"Ошибка загрузки публичного ключа: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Ошибка обработки публичного ключа: {e}")
+            return None
+
+    def load_public_key(self):
+        """Загрузка публичного ключа (локальный или с сервера)"""
+        try:
+            # Если ключ уже кеширован в памяти
+            if self._cached_public_key:
+                return self._cached_public_key
+                
+            # Пытаемся загрузить из кеша
+            if self.cached_public_key_path.exists():
+                try:
+                    with open(self.cached_public_key_path, 'rb') as f:
+                        self._cached_public_key = load_pem_public_key(f.read())
+                    logger.info("Публичный ключ загружен из кеша")
+                    return self._cached_public_key
+                except Exception as e:
+                    logger.warning(f"Ошибка загрузки кеша ключа: {e}")
+            
+            # Пытаемся загрузить локальный ключ (для администратора)
+            if self.public_key_path.exists():
+                with open(self.public_key_path, 'rb') as f:
+                    self._cached_public_key = load_pem_public_key(f.read())
+                logger.info("Публичный ключ загружен локально")
+                return self._cached_public_key
+            
+            # Загружаем с сервера
+            if self.public_key_url:
+                self._cached_public_key = self.download_public_key()
+                return self._cached_public_key
+            
+            logger.error("Публичный ключ не найден ни локально, ни на сервере")
+            return None
             
         except Exception as e:
             logger.error(f"Ошибка загрузки публичного ключа: {e}")
@@ -280,9 +347,9 @@ class CryptoManager:
             return False
 
 # Утилиты для интеграции с существующим кодом
-def verify_update_integrity(update_archive, manifest_path=None):
+def verify_update_integrity(update_archive, manifest_path=None, public_key_url=None):
     """Проверка целостности архива обновления"""
-    crypto_manager = CryptoManager()
+    crypto_manager = CryptoManager(public_key_url=public_key_url)
     
     if manifest_path and os.path.exists(manifest_path):
         # Проверяем через манифест
@@ -299,3 +366,15 @@ def verify_update_integrity(update_archive, manifest_path=None):
     
     logger.warning(f"Не найдены данные для проверки целостности: {update_archive}")
     return False
+
+def refresh_public_key(public_key_url):
+    """Принудительное обновление публичного ключа с сервера"""
+    crypto_manager = CryptoManager(public_key_url=public_key_url)
+    
+    # Удаляем старый кеш
+    if crypto_manager.cached_public_key_path.exists():
+        crypto_manager.cached_public_key_path.unlink()
+    crypto_manager._cached_public_key = None
+    
+    # Загружаем новый ключ
+    return crypto_manager.download_public_key() is not None

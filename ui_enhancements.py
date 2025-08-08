@@ -36,6 +36,7 @@ class StatisticsManager:
             'total_downloaded_mb': 0,
             'total_update_count': 0,
             'average_speed_mbps': 0,
+            'launch_count': 0,
             'first_run_date': datetime.now().isoformat(),
             'last_run_date': datetime.now().isoformat()
         }
@@ -48,6 +49,18 @@ class StatisticsManager:
                 json.dump(self.stats, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error(f"Ошибка сохранения статистики: {e}")
+    
+    def record_launch(self):
+        """Запись факта запуска лаунчера"""
+        self.stats['last_run_date'] = datetime.now().isoformat()
+        
+        # Подсчитываем общее количество запусков
+        if 'launch_count' not in self.stats:
+            self.stats['launch_count'] = 0
+        self.stats['launch_count'] += 1
+        
+        logger.info(f"Запуск #{self.stats['launch_count']}")
+        self.save_stats()
     
     def record_download(self, file_name: str, file_size: int, download_time: float, speed: float):
         """Запись информации о загрузке"""
@@ -99,6 +112,7 @@ class StatisticsManager:
             'total_updates': self.stats['total_update_count'],
             'total_downloaded_mb': self.stats['total_downloaded_mb'],
             'average_speed_mbps': self.stats['average_speed_mbps'],
+            'launch_count': self.stats.get('launch_count', 0),
             'first_run_date': self.stats['first_run_date'],
             'last_run_date': self.stats['last_run_date']
         }

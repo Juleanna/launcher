@@ -1,0 +1,389 @@
+{
+  "version": "1.0",
+  "description": "Конфигурация UI для Lineage 2 лаунчера",
+  "widgets": [
+    {
+      "id": "name_server",
+      "type": "label", 
+      "properties": {
+        "x": 9,
+        "y": 9,
+        "width": 300,
+        "height": 22,
+        "text": "Lineage 2",
+        "font_family": "Bahnschrift Light Condensed",
+        "font_size": 14,
+        "text_color": "#ffffff",
+        "background_color": "transparent",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "version_label",
+      "type": "label",
+      "properties": {
+        "x": 1050,
+        "y": 12,
+        "width": 141,
+        "height": 16,
+        "text": "Version: 1.0.0",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#ffffff",
+        "background_color": "transparent",
+        "border_width": 0,
+        "border_color": "transparent", 
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "main_logo",
+      "type": "image",
+      "properties": {
+        "x": 10,
+        "y": 40,
+        "width": 138,
+        "height": 138,
+        "text": "Logo",
+        "image_path": "images/logo.png",
+        "scale_mode": "KeepAspectRatio",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#ffffff",
+        "background_color": "transparent",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_telegram",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 110, 
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_facebook",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 160,
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_vk",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 210,
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_instagram",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 260,
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_discord",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 310,
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "social_website",
+      "type": "button",
+      "properties": {
+        "x": 1232,
+        "y": 60,
+        "width": 32,
+        "height": 32,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 16,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "window_close",
+      "type": "button",
+      "properties": {
+        "x": 1239,
+        "y": 0,
+        "width": 40,
+        "height": 40,
+        "text": "✕",
+        "font_family": "Arial",
+        "font_size": 16,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "window_minimize",
+      "type": "button",
+      "properties": {
+        "x": 1199,
+        "y": 0,
+        "width": 40,
+        "height": 40,
+        "text": "−",
+        "font_family": "Arial",
+        "font_size": 16,
+        "text_color": "#ffffff",
+        "background_color": "#000000",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "file_progress",
+      "type": "progress",
+      "properties": {
+        "x": 90,
+        "y": 600,
+        "width": 811,
+        "height": 22,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#000000",
+        "background_color": "rgba(0, 0, 0, 0.5)",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 5,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "overall_progress",
+      "type": "progress",
+      "properties": {
+        "x": 90,
+        "y": 640,
+        "width": 811,
+        "height": 22,
+        "text": "",
+        "font_family": "Arial",
+        "font_size": 10,
+        "text_color": "#000000",
+        "background_color": "rgba(0, 0, 0, 0.5)",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 5,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "banner_image",
+      "type": "image",
+      "properties": {
+        "x": 730,
+        "y": 240,
+        "width": 461,
+        "height": 213,
+        "text": "Banner",
+        "image_path": "images/banner.png",
+        "scale_mode": "ScaleToFit",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#ffffff",
+        "background_color": "transparent",
+        "border_width": 0,
+        "border_color": "transparent",
+        "border_radius": 0,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "update_button_main",
+      "type": "button",
+      "properties": {
+        "x": 930,
+        "y": 590,
+        "width": 111,
+        "height": 61,
+        "text": "Обновить",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#000000",
+        "background_color": "#ffcd00",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 8,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "play_button_main",
+      "type": "button",
+      "properties": {
+        "x": 1060,
+        "y": 590,
+        "width": 101,
+        "height": 61,
+        "text": "Играть",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#ffffff",
+        "background_color": "#4CAF50",
+        "border_width": 2,
+        "border_color": "#ffffff",
+        "border_radius": 8,
+        "opacity": 1.0,
+        "visible": true
+      }
+    },
+    {
+      "id": "info_tab_widget",
+      "type": "label",
+      "properties": {
+        "x": 90,
+        "y": 220,
+        "width": 551,
+        "height": 311,
+        "text": "Информация",
+        "font_family": "Arial",
+        "font_size": 12,
+        "text_color": "#ffffff",
+        "background_color": "rgba(255, 255, 255, 0.1)",
+        "border_width": 1,
+        "border_color": "#C4C4C3",
+        "border_radius": 5,
+        "opacity": 1.0,
+        "visible": true
+      }
+    }
+  ],
+  "canvas_settings": {
+    "grid_size": 10,
+    "show_grid": true,
+    "snap_to_grid": true,
+    "canvas_width": 1277,
+    "canvas_height": 728,
+    "background_color": "#2c3e50",
+    "background_image": "images/background.png"
+  },
+  "theme": {
+    "name": "Lineage2",
+    "primary_color": "#ffcd00",
+    "secondary_color": "#4CAF50", 
+    "accent_color": "#ffffff",
+    "text_color": "#ffffff",
+    "background_color": "#2c3e50",
+    "border_color": "#ffffff"
+  },
+  "responsive": {
+    "enabled": false,
+    "breakpoints": {
+      "small": 800,
+      "medium": 1024,
+      "large": 1280
+    }
+  },
+  "animations": {
+    "enabled": true,
+    "duration": 300,
+    "easing": "ease-in-out"
+  },
+  "metadata": {
+    "created": "2025-01-08",
+    "modified": "2025-01-08",
+    "version": "1.0.0",
+    "author": "UI Editor",
+    "description": "Конфигурация интерфейса для Lineage 2 лаунчера с социальными кнопками, прогресс-барами и баннером",
+    "tags": ["launcher", "lineage2", "game", "ui"]
+  }
+}

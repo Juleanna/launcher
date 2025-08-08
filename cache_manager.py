@@ -70,10 +70,15 @@ class CacheManager:
             logger.error(f"Ошибка проверки валидности кэша {cache_key}: {e}")
             return False
     
-    def get(self, url: str, params: Dict = None) -> Optional[Any]:
+    def get(self, url: str, params: Dict = None, ttl: int = None) -> Optional[Any]:
         """Получение данных из кэша"""
         try:
             cache_key = self._get_cache_key(url, params)
+            
+            # Если передан ttl, обновляем его в индексе
+            if ttl is not None and cache_key in self.index:
+                self.index[cache_key]['ttl'] = ttl
+                self.save_index()
             
             if not self.is_valid(cache_key):
                 return None

@@ -193,6 +193,18 @@ class RollbackManager:
     def __init__(self, backup_manager: BackupManager):
         self.backup_manager = backup_manager
     
+    def prepare_rollback(self, version: str, files: List[str]) -> bool:
+        """Подготовка отката - создание резервной копии перед обновлением"""
+        try:
+            return self.backup_manager.create_backup(
+                version=version,
+                source_files=files,
+                description=f"Автоматическая резервная копия перед обновлением"
+            ) is not None
+        except Exception as e:
+            logger.error(f"Ошибка подготовки отката: {e}")
+            return False
+    
     def perform_rollback(self, target_version: str) -> bool:
         """Выполнение отката к указанной версии"""
         try:
