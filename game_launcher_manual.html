@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полное руководство по игровому лаунчеру</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        nav {
+            background: #2c3e50;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px;
+        }
+        
+        .nav-btn {
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+        
+        main {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.4s; }
+        .section:nth-child(4) { animation-delay: 0.6s; }
+        
+        h2 {
+            font-size: 2.2em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #3498db;
+            position: relative;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #ffa726);
+            border-radius: 3px;
+        }
+        
+        h3 {
+            font-size: 1.6em;
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            padding: 15px 0 15px 20px;
+            border-left: 4px solid #3498db;
+            background: linear-gradient(90deg, rgba(52, 152, 219, 0.1), transparent);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+        
+        .feature-card h4 {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #3498db;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-color: #2196f3;
+            color: #0d47a1;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);
+            border-color: #ff9800;
+            color: #e65100;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border-color: #4caf50;
+            color: #1b5e20;
+        }
+        
+        .requirements-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .requirement-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #27ae60;
+            transition: all 0.3s ease;
+        }
+        
+        .requirement-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+        }
+        
+        .step-list li {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            position: relative;
+            padding-left: 60px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        
+        footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 0 0 20px 20px;
+            margin-top: 60px;
+        }
+        
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(52, 152, 219, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            main {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .nav-container {
+                padding: 0 10px;
+            }
+            
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #ffa726, #42a5f5, #ab47bc);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            z-index: 10000;
+            transition: width 0.3s ease;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><span class="emoji">🎮</span>Игровой лаунчер</h1>
+                <p class="subtitle">Полное руководство по установке, настройке и использованию</p>
+            </div>
+        </header>
+
+        <nav>
+            <div class="nav-container">
+                <a href="#quick-start" class="nav-btn">Быстрый старт</a>
+                <a href="#installation" class="nav-btn">Установка</a>
+                <a href="#features" class="nav-btn">Возможности</a>
+                <a href="#web-content" class="nav-btn">Веб-контент</a>
+                <a href="#ui-editor" class="nav-btn">UI редактор</a>
+                <a href="#updates" class="nav-btn">Обновления</a>
+                <a href="#troubleshooting" class="nav-btn">Решение проблем</a>
+            </div>
+        </nav>
+
+        <main>
+            <section id="quick-start" class="section">
+                <h2><span class="emoji">🚀</span>Быстрый старт</h2>
+                
+                <div class="alert alert-info">
+                    <h4>Минимальные требования системы:</h4>
+                </div>
+                
+                <div class="requirements-list">
+                    <div class="requirement-item">
+                        <strong>ОС:</strong> Windows 7/10/11, Linux, macOS
+                    </div>
+                    <div class="requirement-item">
+                        <strong>Python:</strong> 3.7 или новее
+                    </div>
+                    <div class="requirement-item">
+                        <strong>ОЗУ:</strong> 512 МБ
+                    </div>
+                    <div class="requirement-item">
+                        <strong>Диск:</strong> 150 МБ + место для игр
+                    </div>
+                </div>
+
+                <h3>Первый запуск</h3>
+                <ol class="step-list">
+                    <li>Скачайте лаунчер в папку по вашему выбору</li>
+                    <li>Откройте командную строку в папке лаунчера</li>
+                    <li>Установите зависимости: <code>pip install -r requirements.txt</code></li>
+                    <li>Запустите лаунчер: <code>python Launcher.py</code></li>
+                </ol>
+
+                <div class="alert alert-success">
+                    При первом запуске лаунчер автоматически создаст необходимые файлы конфигурации и настроит систему безопасности.
+                </div>
+            </section>
+
+            <section id="installation" class="section">
+                <h2><span class="emoji">⚙️</span>Установка и настройка</h2>
+                
+                <h3>Полная установка</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><div class="feature-icon">1</div>Установка Python</h4>
+                        <pre>
+# Windows: скачайте с python.org
+# Ubuntu/Debian:
+sudo apt update
+sudo apt install python3 python3-pip
+
+# macOS:
+brew install python3
+                        </pre>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><div class="feature-icon">2</div>Клонирование</h4>
+                        <pre>
+git clone &lt;repository-url&gt;
+cd launcher
+                        </pre>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><div class="feature-icon">3</div>Зависимости</h4>
+                        <pre>
+pip install -r requirements.txt
+                        </pre>
+                    </div>
+                </div>
+
+                <h3>Основные зависимости</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Модуль</th>
+                            <th>Версия</th>
+                            <th>Назначение</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PyQt5</td>
+                            <td>≥5.15.0</td>
+                            <td>GUI фреймворк</td>
+                        </tr>
+                        <tr>
+                            <td>requests</td>
+                            <td>≥2.25.0</td>
+                            <td>HTTP запросы</td>
+                        </tr>
+                        <tr>
+                            <td>aiohttp</td>
+                            <td>≥3.8.0</td>
+                            <td>Асинхронные запросы</td>
+                        </tr>
+                        <tr>
+                            <td>cryptography</td>
+                            <td>≥3.4.8</td>
+                            <td>Цифровые подписи</td>
+                        </tr>
+                        <tr>
+                            <td>bsdiff4</td>
+                            <td>≥1.2.2</td>
+                            <td>Delta-обновления</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="features" class="section">
+                <h2><span class="emoji">🎮</span>Основные функции</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><span class="emoji">⚡</span>Быстрые загрузки</h4>
+                        <p>Delta-обновления экономят до 70% трафика. Возобновляемые загрузки с паузой и автоматическим выбором зеркал.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🔒</span>Безопасность</h4>
+                        <p>RSA цифровые подписи, SHA-256 проверка целостности, принудительное HTTPS шифрование.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🌐</span>P2P сеть</h4>
+                        <p>Peer-to-peer распределение нагрузки между пользователями для ускорения загрузок.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">📊</span>Статистика</h4>
+                        <p>Детальная аналитика скорости, использования сети, P2P метрик и истории операций.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">💾</span>Резервные копии</h4>
+                        <p>Автоматические бэкапы с возможностью отката к предыдущей версии при ошибках.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🔄</span>CDN поддержка</h4>
+                        <p>Автоматический выбор ближайшего зеркала и переключение между CDN серверами.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="web-content" class="section">
+                <h2><span class="emoji">🌐</span>Веб-контент и новости</h2>
+                
+                <div class="alert alert-info">
+                    Лаунчер поддерживает отображение веб-контента прямо в интерфейсе через систему табов.
+                </div>
+                
+                <h3>Настройка источников новостей</h3>
+                
+                <pre>
+[WebContent]
+auto_refresh = 1          # Автоматическое обновление
+refresh_interval = 300    # Интервал в секундах (5 минут)
+
+[NewsSource1]
+name = Новости сервера    # Название таба
+url = https://yourserver.com/api/news.json
+type = json
+enabled = 1
+
+[NewsSource2]
+name = Обновления
+url = https://yourserver.com/rss/updates.xml
+type = rss
+enabled = 1
+                </pre>
+                
+                <h3>Поддерживаемые форматы</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><span class="emoji">📄</span>JSON Feed</h4>
+                        <pre>
+{
+  "items": [
+    {
+      "title": "Название новости",
+      "content_html": "&lt;p&gt;HTML контент&lt;/p&gt;",
+      "date_published": "2024-01-01T10:00:00Z",
+      "url": "https://example.com/news/1",
+      "author": {"name": "Автор"}
+    }
+  ]
+}
+                        </pre>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">📡</span>RSS Feed</h4>
+                        <p>Стандартный RSS 2.0 формат с элементами:</p>
+                        <ul>
+                            <li><code>&lt;title&gt;</code> - заголовок</li>
+                            <li><code>&lt;description&gt;</code> - описание</li>
+                            <li><code>&lt;link&gt;</code> - ссылка на новость</li>
+                            <li><code>&lt;pubDate&gt;</code> - дата публикации</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🌍</span>HTML страницы</h4>
+                        <p>Автоматическое извлечение контента из:</p>
+                        <ul>
+                            <li><code>&lt;h1&gt;</code>, <code>&lt;title&gt;</code> - заголовки</li>
+                            <li><code>&lt;p&gt;</code>, <code>&lt;div&gt;</code>, <code>&lt;article&gt;</code> - контент</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ui-editor" class="section">
+                <h2><span class="emoji">🎨</span>UI редактор</h2>
+                
+                <div class="alert alert-warning">
+                    Визуальный редактор интерфейса позволяет настраивать лаунчер без знания программирования.
+                </div>
+                
+                <h3>Запуск редактора</h3>
+                <pre>python ui_editor_launcher.py</pre>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><span class="emoji">🖱️</span>Drag & Drop</h4>
+                        <p>Перетаскивайте элементы мышкой, изменяйте размеры, используйте привязку к сетке.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🔧</span>Панель элементов</h4>
+                        <ul>
+                            <li>🔘 Кнопка - интерактивные элементы</li>
+                            <li>📝 Текст - текстовые метки</li>
+                            <li>▬ Прогресс-бар - индикаторы</li>
+                            <li>🖼️ Изображение - картинки и логотипы</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">⚙️</span>Инспектор свойств</h4>
+                        <ul>
+                            <li>Позиция: X, Y координаты</li>
+                            <li>Размер: ширина и высота</li>
+                            <li>Текст: содержимое и шрифт</li>
+                            <li>Цвета: фон, текст, границы</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="updates" class="section">
+                <h2><span class="emoji">📦</span>Система обновлений</h2>
+                
+                <h3>Генератор обновлений (Update.py)</h3>
+                
+                <ol class="step-list">
+                    <li>Запустите <code>python Update.py</code></li>
+                    <li>Введите номер версии (например: 1.2.3)</li>
+                    <li>Выберите директорию с новыми файлами</li>
+                    <li>Выберите выходной файл</li>
+                    <li>Настройте безопасность (цифровые подписи)</li>
+                    <li>Настройте Delta-обновления (опционально)</li>
+                    <li>Нажмите "Сгенерировать файл обновлений"</li>
+                </ol>
+                
+                <div class="alert alert-success">
+                    <strong>Delta-обновления экономят 50-80% трафика!</strong> Они содержат только изменения между версиями.
+                </div>
+                
+                <h3>Создаваемые файлы</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Файл</th>
+                            <th>Назначение</th>
+                            <th>Обязательный</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>files_list_v1.2.3.txt</td>
+                            <td>Список файлов с хешами</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>files_list_v1.2.3.zip</td>
+                            <td>ZIP архив с файлами</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>*.zip.hash</td>
+                            <td>Хеш архива</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>*.zip.manifest</td>
+                            <td>Цифровые подписи</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>*_delta_*.zip</td>
+                            <td>Delta-пакет изменений</td>
+                            <td>❌</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="troubleshooting" class="section">
+                <h2><span class="emoji">🔧</span>Устранение неполадок</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><span class="emoji">❌</span>Лаунчер не запускается</h4>
+                        <pre>
+# Проверьте Python
+python --version
+
+# Переустановите зависимости
+pip install --force-reinstall -r requirements.txt
+
+# Проверьте права доступа
+# Windows: запуск от имени администратора
+                        </pre>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🐌</span>Медленная загрузка</h4>
+                        <ul>
+                            <li>Включите P2P: <code>enable_p2p = true</code></li>
+                            <li>Увеличьте соединения: <code>max_connections = 16</code></li>
+                            <li>Проверьте CDN зеркала</li>
+                            <li>Отключите VPN/антивирус</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🔐</span>Ошибки подписей</h4>
+                        <pre>
+# Временное отключение (не рекомендуется)
+[Security]
+verify_signatures = false
+
+# Или обновите ключи с сервера
+                        </pre>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4><span class="emoji">🌐</span>P2P не работает</h4>
+                        <ul>
+                            <li>Откройте порт в роутере/фаерволле</li>
+                            <li>Проверьте трекер-сервер</li>
+                            <li>Убедитесь что есть другие пиры</li>
+                            <li>Проверьте сетевые настройки</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <h4>Полезные команды диагностики:</h4>
+                    <pre>
+# Проверка зеркал CDN
+python -c "from cdn_manager import get_cdn_manager; asyncio.run(get_cdn_manager().check_all_mirrors())"
+
+# Тест P2P
+python -c "from p2p_distribution import P2PDistributor; print('Peer ID:', P2PDistributor().get_peer_id())"
+
+# Статистика сети
+python -c "from bandwidth_optimizer import get_network_optimizer; print(get_network_optimizer().get_statistics())"
+                    </pre>
+                </div>
+
+                <h3>Часто задаваемые вопросы</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Q: Можно ли установить без Python?</h4>
+                        <p>A: Нет, лаунчер написан на Python. Планируется standalone версия.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>Q: Какую версию Python использовать?</h4>
+                        <p>A: Минимум 3.8, рекомендуется 3.9+ для лучшей производительности.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>Q: Работает ли на Linux/macOS?</h4>
+                        <p>A: Да, лаунчер кроссплатформенный и протестирован на всех системах.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>Q: Безопасен ли P2P режим?</h4>
+                        <p>A: Да, все передачи проверяются цифровыми подписями и хешами.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <h3><span class="emoji">🎯</span>Заключение</h3>
+                <p>Игровой лаунчер обеспечивает современный, безопасный и эффективный способ доставки обновлений с веб-интеграцией, визуальным редактором интерфейса и множеством продвинутых возможностей.</p>
+                <br>
+                <div class="feature-grid">
+                    <div>✅ <strong>Простота использования</strong> - интуитивный интерфейс</div>
+                    <div>✅ <strong>Безопасность</strong> - цифровые подписи и шифрование</div>
+                    <div>✅ <strong>Эффективность</strong> - Delta-обновления и P2P</div>
+                    <div>✅ <strong>Надёжность</strong> - автоматические бэкапы</div>
+                    <div>✅ <strong>Масштабируемость</strong> - поддержка тысяч пользователей</div>
+                    <div>✅ <strong>Интеграция</strong> - веб-контент и настраиваемый UI</div>
+                </div>
+                <br>
+                <p><strong>Удачной игры! 🎮</strong></p>
+                <p><em>Система постоянно развивается - следите за обновлениями!</em></p>
+            </div>
+        </footer>
+    </div>
+
+    <a href="#" class="back-to-top" id="backToTop">↑</a>
+
+    <script>
+        // Smooth scrolling для навигации
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Прогресс-бар чтения
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        // Кнопка "Наверх"
+        function toggleBackToTop() {
+            const backToTop = document.getElementById('backToTop');
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            
+            if (scrollTop > 300) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
+            }
+        }
+
+        // Обработчики событий
+        window.addEventListener('scroll', () => {
+            updateProgressBar();
+            toggleBackToTop();
+        });
+
+        // Кнопка "Наверх"
+        document.getElementById('backToTop').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressBar();
+            toggleBackToTop();
+            
+            // Анимация появления секций при прокрутке
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Наблюдаем за всеми секциями
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

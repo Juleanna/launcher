@@ -1,0 +1,64 @@
+2025-08-09 00:01:55 - root - INFO - setup_logging:70 - ==================================================
+2025-08-09 00:01:55 - root - INFO - setup_logging:71 - Запуск лаунчера 2025-08-09 00:01:55
+2025-08-09 00:01:55 - root - INFO - setup_logging:72 - ==================================================
+2025-08-09 00:01:55 - root - INFO - __init__:995 - Инициализация окна лаунчера
+2025-08-09 00:01:55 - root - INFO - __init__:1010 - Конфигурация успешно загружена
+2025-08-09 00:01:55 - root - INFO - __init__:1080 - Кнопка паузы не найдена в UI
+2025-08-09 00:01:55 - root - INFO - __init__:1096 - Кнопка отката не найдена в UI
+2025-08-09 00:01:55 - root - INFO - __init__:1111 - Кнопка UI редактора не найдена в UI
+2025-08-09 00:01:55 - ui_enhancements - INFO - record_launch:62 - Запуск #1
+2025-08-09 00:01:55 - root - INFO - __init__:1130 - Контейнер info_container не найден в UI
+2025-08-09 00:01:55 - root - INFO - __init__:1141 - Контейнер progress_container не найден в UI
+2025-08-09 00:01:55 - root - INFO - __init__:1170 - Найдено 5 изображений для слайдера
+2025-08-09 00:01:56 - root - INFO - apply_ui_config:1734 - Конфигурация UI применена из launcher_ui_config.ui.json
+2025-08-09 00:01:58 - root - INFO - run:858 - Запуск процесса обновления
+2025-08-09 00:02:00 - root - WARNING - check_for_launcher_update:842 - Сервер обновлений недоступен: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 00:02:00 - root - INFO - check_for_launcher_update:845 - Работа в оффлайн режиме - локальный сервер недоступен
+2025-08-09 00:02:00 - root - INFO - run:879 - Обновление лаунчера не требуется. Текущая версия: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 00:02:00 - root - INFO - update_files:527 - Начинаем проверку обновлений игры
+2025-08-09 00:02:00 - root - INFO - get_current_game_files:933 - Найдено 69 файлов для резервного копирования
+2025-08-09 00:02:00 - root - INFO - create_pre_update_backup:497 - Создание резервной копии версии 1.0.2
+2025-08-09 00:02:00 - backup_manager - INFO - create_backup:51 - Создание резервной копии: backup_v1.0.2_20250809_000200.zip
+2025-08-09 00:02:03 - backup_manager - INFO - create_backup:99 - Резервная копия создана: backup_v1.0.2_20250809_000200.zip (69 файлов, 10371056 байт)
+2025-08-09 00:02:03 - root - INFO - create_pre_update_backup:500 - Резервная копия создана успешно
+2025-08-09 00:02:05 - download_manager - WARNING - check_resume_support:109 - Ошибка проверки поддержки возобновления: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 00:02:07 - download_manager - ERROR - download:193 - Ошибка загрузки https://127.0.0.1:30000/static/updates/version.txt: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 00:02:07 - download_manager - ERROR - start_download:331 - Ошибка выполнения загрузки https://127.0.0.1:30000/static/updates/version.txt_version.txt: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 00:02:07 - root - ERROR - fetch_file_resumable:357 - Ошибка возобновляемой загрузки: Ошибка загрузки
+2025-08-09 00:02:07 - root - ERROR - update_files:784 - Ошибка обновления: Ошибка загрузки
+2025-08-09 00:02:07 - root - INFO - update_files:795 - Попытка автоматического отката к версии 1.0.2
+2025-08-09 00:02:07 - backup_manager - INFO - perform_rollback:217 - Начинаем откат к версии 1.0.2
+2025-08-09 00:02:07 - backup_manager - INFO - perform_rollback:256 - Откат завершен: восстановлено 69/69 файлов
+2025-08-09 12:30:10 - root - INFO - setup_logging:70 - ==================================================
+2025-08-09 12:30:10 - root - INFO - setup_logging:71 - Запуск лаунчера 2025-08-09 12:30:10
+2025-08-09 12:30:10 - root - INFO - setup_logging:72 - ==================================================
+2025-08-09 12:30:10 - root - WARNING - <module>:114 - Веб-контент модуль недоступен. Новости не будут отображаться.
+2025-08-09 12:30:10 - root - INFO - __init__:1004 - Инициализация окна лаунчера
+2025-08-09 12:30:10 - root - INFO - __init__:1019 - Конфигурация успешно загружена
+2025-08-09 12:30:10 - root - INFO - __init__:1089 - Кнопка паузы не найдена в UI
+2025-08-09 12:30:10 - root - INFO - __init__:1105 - Кнопка отката не найдена в UI
+2025-08-09 12:30:10 - root - INFO - __init__:1120 - Кнопка UI редактора не найдена в UI
+2025-08-09 12:30:10 - ui_enhancements - INFO - record_launch:62 - Запуск #2
+2025-08-09 12:30:10 - root - INFO - __init__:1139 - Контейнер info_container не найден в UI
+2025-08-09 12:30:10 - root - INFO - __init__:1150 - Контейнер progress_container не найден в UI
+2025-08-09 12:30:10 - root - INFO - __init__:1179 - Найдено 5 изображений для слайдера
+2025-08-09 12:30:10 - root - INFO - apply_ui_config:1746 - Конфигурация UI применена из launcher_ui_config.ui.json
+2025-08-09 12:30:10 - root - INFO - setup_web_content:1812 - Веб-контент недоступен, пропускаем настройку табов
+2025-08-09 12:30:12 - root - INFO - run:867 - Запуск процесса обновления
+2025-08-09 12:30:14 - root - WARNING - check_for_launcher_update:851 - Сервер обновлений недоступен: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 12:30:14 - root - INFO - check_for_launcher_update:854 - Работа в оффлайн режиме - локальный сервер недоступен
+2025-08-09 12:30:14 - root - INFO - run:888 - Обновление лаунчера не требуется. Текущая версия: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 12:30:15 - root - INFO - update_files:536 - Начинаем проверку обновлений игры
+2025-08-09 12:30:15 - root - INFO - get_current_game_files:942 - Найдено 71 файлов для резервного копирования
+2025-08-09 12:30:15 - root - INFO - create_pre_update_backup:506 - Создание резервной копии версии 1.0.2
+2025-08-09 12:30:15 - backup_manager - INFO - create_backup:51 - Создание резервной копии: backup_v1.0.2_20250809_123015.zip
+2025-08-09 12:30:17 - backup_manager - INFO - create_backup:99 - Резервная копия создана: backup_v1.0.2_20250809_123015.zip (71 файлов, 10374404 байт)
+2025-08-09 12:30:17 - root - INFO - create_pre_update_backup:509 - Резервная копия создана успешно
+2025-08-09 12:30:19 - download_manager - WARNING - check_resume_support:109 - Ошибка проверки поддержки возобновления: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 12:30:21 - download_manager - ERROR - download:193 - Ошибка загрузки https://127.0.0.1:30000/static/updates/version.txt: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 12:30:21 - download_manager - ERROR - start_download:331 - Ошибка выполнения загрузки https://127.0.0.1:30000/static/updates/version.txt_version.txt: Cannot connect to host 127.0.0.1:30000 ssl:default [The remote computer refused the network connection]
+2025-08-09 12:30:21 - root - ERROR - fetch_file_resumable:366 - Ошибка возобновляемой загрузки: Ошибка загрузки
+2025-08-09 12:30:21 - root - ERROR - update_files:793 - Ошибка обновления: Ошибка загрузки
+2025-08-09 12:30:21 - root - INFO - update_files:804 - Попытка автоматического отката к версии 1.0.2
+2025-08-09 12:30:21 - backup_manager - INFO - perform_rollback:217 - Начинаем откат к версии 1.0.2
+2025-08-09 12:30:22 - backup_manager - INFO - perform_rollback:256 - Откат завершен: восстановлено 71/71 файлов

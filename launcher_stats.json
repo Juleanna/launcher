@@ -1,0 +1,25 @@
+{
+  "downloads": [],
+  "updates": [
+    {
+      "from_version": "1.0.2",
+      "to_version": false,
+      "update_type": 0,
+      "success": 7.208247700007632,
+      "timestamp": "2025-08-09T00:02:07.835893"
+    },
+    {
+      "from_version": "1.0.2",
+      "to_version": false,
+      "update_type": 0,
+      "success": 7.182987299980596,
+      "timestamp": "2025-08-09T12:30:22.259124"
+    }
+  ],
+  "total_downloaded_mb": 0,
+  "total_update_count": 2,
+  "average_speed_mbps": 0,
+  "launch_count": 2,
+  "first_run_date": "2025-08-09T00:01:55.943332",
+  "last_run_date": "2025-08-09T12:30:22.259174"
+}

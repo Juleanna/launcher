@@ -72,6 +72,13 @@ except ImportError:
     get_cache_manager = None
     get_metadata_cache = None
 
+try:
+    from web_content_manager import WebContentManager
+    WEB_CONTENT_AVAILABLE = True
+except ImportError:
+    WEB_CONTENT_AVAILABLE = False
+    WebContentManager = None
+
 # Настройка улучшенной системы логирования
 try:
     from launcher_log_config import setup_logging, LauncherLogger
@@ -103,6 +110,8 @@ if not UI_ENHANCEMENTS_AVAILABLE:
     logger.warning("Улучшения UI недоступны. Используется обычный интерфейс.")
 if not CACHE_AVAILABLE:
     logger.warning("Кэширование недоступно.")
+if not WEB_CONTENT_AVAILABLE:
+    logger.warning("Веб-контент модуль недоступен. Новости не будут отображаться.")
 
 # Константы безопасности
 # Константы безопасности
@@ -1215,6 +1224,9 @@ class LauncherWindow(QMainWindow):
 
         # Применяем пользовательскую конфигурацию UI если она есть
         self.apply_ui_config()
+        
+        # Инициализация веб-контента для табов
+        self.setup_web_content()
 
         self.update_launcher_on_startup()
 
@@ -1792,6 +1804,70 @@ class LauncherWindow(QMainWindow):
             
         except Exception as e:
             logger.error(f"Ошибка применения свойств к виджету: {e}")
+    
+    def setup_web_content(self):
+        """Настройка веб-контента в табах"""
+        try:
+            if not WEB_CONTENT_AVAILABLE:
+                logger.info("Веб-контент недоступен, пропускаем настройку табов")
+                return
+                
+            # Ищем QTabWidget с именем "info"
+            from PyQt5.QtWidgets import QTabWidget
+            self.info_tab_widget = self.findChild(QTabWidget, 'info')
+            if not self.info_tab_widget:
+                logger.warning("QTabWidget 'info' не найден")
+                return
+            
+            # Инициализируем менеджер веб-контента
+            self.web_content_manager = WebContentManager()
+            
+            # Получаем источники новостей из конфигурации
+            news_sources = self.web_content_manager.get_news_sources()
+            
+            if not news_sources:
+                logger.info("Источники новостей не настроены")
+                return
+            
+            # Очищаем существующие табы
+            self.info_tab_widget.clear()
+            
+            # Создаем табы для каждого источника новостей
+            for source_name in news_sources.keys():
+                news_widget = self.web_content_manager.create_news_widget(source_name)
+                self.info_tab_widget.addTab(news_widget, source_name)
+                logger.info(f"Добавлен таб для источника: {source_name}")
+            
+            # Запускаем автоматическое обновление
+            self.web_content_manager.start_auto_refresh()
+            
+            # Делаем первую загрузку контента
+            self.web_content_manager.refresh_all_content()
+            
+            logger.info("Веб-контент успешно настроен")
+            
+        except Exception as e:
+            logger.error(f"Ошибка настройки веб-контента: {e}")
+            # В случае ошибки оставляем табы по умолчанию
+    
+    def closeEvent(self, event):
+        """Обработка закрытия окна"""
+        try:
+            # Останавливаем веб-контент
+            if hasattr(self, 'web_content_manager') and self.web_content_manager:
+                self.web_content_manager.stop_auto_refresh()
+                logger.info("Веб-контент остановлен")
+            
+            # Безопасно останавливаем поток обновления
+            if hasattr(self, 'update_thread') and self.update_thread.isRunning():
+                logger.info("Останавливаем поток обновления...")
+                self.update_thread.stop_safely()
+            
+            event.accept()
+            
+        except Exception as e:
+            logger.error(f"Ошибка при закрытии лаунчера: {e}")
+            event.accept()
 
 
 if __name__ == '__main__':
