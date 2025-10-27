@@ -4,7 +4,6 @@ import hashlib
 import aiohttp
 import asyncio
 import zipfile
-import urllib.request
 import re
 import logging
 import ssl
@@ -21,11 +20,10 @@ from io import BytesIO
 from packaging.version import parse as parse_version
 import subprocess
 try:
-    from crypto_utils import CryptoManager, verify_update_integrity
+    from crypto_verifier import verify_update_integrity
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-    CryptoManager = None
     verify_update_integrity = None
 
 try:
@@ -117,7 +115,11 @@ if not WEB_CONTENT_AVAILABLE:
 # Константы безопасности
 MAX_ARCHIVE_SIZE = 100 * 1024 * 1024  # 100 MB максимальный размер архива
 MAX_EXTRACTED_SIZE = 500 * 1024 * 1024  # 500 MB максимальный размер распакованных файлов
-ALLOWED_FILE_EXTENSIONS = {'.exe', '.dll', '.dat', '.txt', '.cfg', '.ini', '.xml', '.json', '.png', '.jpg', '.jpeg'}
+ALLOWED_FILE_EXTENSIONS = {
+    '.exe', '.dll', '.dat', '.txt', '.cfg', '.ini', '.xml', '.json',
+    '.png', '.jpg', '.jpeg',
+    '.pak', '.bin', '.pack'
+}
 DATA_DIR = "launcher_data"  # Директория для данных лаунчера
 BACKUP_DIR = "launcher_backups"  # Директория для резервных копий
 
@@ -860,40 +862,40 @@ class UpdateThread(QThread):
                     print(f"Error checking for launcher update: {e}")
                 return False, str(e)
 
+    async def _run_update_flow(self):
+        logger.info("����� �������� ����������")
+        if self.isInterruptionRequested():
+            self.update_finished.emit(False, "���������� ��������")
+            return
+        needs_update, latest_version = await self.check_for_launcher_update()
+        if self.isInterruptionRequested():
+            self.update_finished.emit(False, "���������� ��������")
+            return
+        if needs_update:
+            logger.info(f"�������� ���������� ��������: {latest_version}")
+            await self.update_launcher()
+        else:
+            logger.info(f"������� ��������. ��������� ������: {latest_version}")
+            await self.update_files()
 
     def run(self):
-        """Основной метод выполнения обновлений"""
+        """������ event loop ������ QThread ��� ����������� ����� ����������."""
+        loop = None
         try:
-            logger.info("Запуск процесса обновления")
-            
-            # Проверка на запрос прерывания
-            if self.isInterruptionRequested():
-                logger.info("Обновление прервано пользователем")
-                self.update_finished.emit(False, "Обновление отменено")
-                return
-            
-            # Проверяем обновления лаунчера
-            needs_update, latest_version = asyncio.run(self.check_for_launcher_update())
-            
-            # Проверка на запрос прерывания
-            if self.isInterruptionRequested():
-                logger.info("Обновление прервано пользователем")
-                self.update_finished.emit(False, "Обновление отменено")
-                return
-            
-            if needs_update:
-                logger.info(f"Обновляем лаунчер до версии {latest_version}")
-                asyncio.run(self.update_launcher())
-            else:
-                logger.info(f"Обновление лаунчера не требуется. Текущая версия: {latest_version}")
-                # Проверяем обновления игры только если лаунчер не обновлялся
-                asyncio.run(self.update_files())
-                
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(self._run_update_flow())
         except Exception as e:
-            logger.error(f"Критическая ошибка в процессе обновления: {e}")
-            self.update_finished.emit(False, f"Критическая ошибка: {e}")
-            
-    def pause_download(self):
+            logger.error(f"������ � �������� ����������: {e}")
+            self.update_finished.emit(False, f"������: {e}")
+        finally:
+            if loop is not None:
+                try:
+                    loop.close()
+                except Exception:
+                    pass
+
+    def pause_download(self):self):
         """Приостановить загрузку"""
         if self.download_manager and self.current_download_id:
             self.download_manager.pause_download(self.current_download_id)
@@ -1875,3 +1877,4 @@ if __name__ == '__main__':
     window = LauncherWindow()
     window.show()
     sys.exit(app.exec_())
+

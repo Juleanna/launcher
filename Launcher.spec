@@ -1,12 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_all
+
+# Collect PyQt5 data/binaries/hidden imports in a portable way
+pyqt5_datas, pyqt5_binaries, pyqt5_hidden = collect_all('PyQt5')
 
 a = Analysis(
     ['Launcher.py'],
     pathex=[],
-    binaries=[],
-    datas=[('C:\\PQt5\\PyQt5\\Qt5\\plugins', 'PyQt5\\Qt\\plugins')],
-    hiddenimports=[],
+    binaries=pyqt5_binaries,
+    datas=pyqt5_datas,
+    hiddenimports=pyqt5_hidden,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -26,7 +30,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,

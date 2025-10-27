@@ -5,7 +5,7 @@ import zipfile
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QVBoxLayout, QPushButton, QLabel, QProgressBar, QWidget, QLineEdit, QMessageBox, QCheckBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 try:
-    from crypto_utils import CryptoManager
+    from crypto_signer import Signer as CryptoManager
     CRYPTO_AVAILABLE = True
 except ImportError:
     print("Криптографические модули недоступны. Подписи отключены.")
@@ -34,6 +34,18 @@ class HashGeneratorThread(QThread):
     
     def run(self):
         try:
+            # Если включена подпись и ключей нет — сгенерировать (только в офлайн-утилите)
+            if self.crypto_manager:
+                try:
+                    from pathlib import Path
+                    if not Path(self.crypto_manager.private_key_path).exists():
+                        ok = self.crypto_manager.generate_keys()
+                        if not ok:
+                            self.finished.emit("Не удалось сгенерировать пару ключей для подписи")
+                            return
+                except Exception:
+                    self.finished.emit("Ошибка подготовки ключей для подписи")
+                    return
             # Подсчитываем общее количество файлов
             total_files = 0
             for root, dirs, files in os.walk(self.directory):
@@ -339,3 +351,4 @@ if __name__ == "__main__":
     window = UpdateGeneratorApp()
     window.show()
     sys.exit(app.exec_())
+
