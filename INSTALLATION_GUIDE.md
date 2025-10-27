@@ -292,7 +292,7 @@ logs/
 ### Настройка цифровых подписей:
 ```bash
 # Генерация ключей
-python -c "from crypto_utils import CryptoManager; cm = CryptoManager(); cm.generate_key_pair()"
+python -c "from crypto_signer import Signer; s = Signer(); s.generate_keys()"
 
 # Ключи сохранятся в папке crypto_keys/
 # Разместите public_key.pem на сервере

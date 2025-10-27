@@ -1,2 +1,0 @@
-python Launcher.py
-pause
